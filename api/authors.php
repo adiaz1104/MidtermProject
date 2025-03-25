@@ -1,35 +1,46 @@
 <?php
-// Set the response to JSON format
+// Headers
+header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-include_once '../config/database.php';
+include_once '../config/Database.php';
 include_once '../models/Author.php';
 
-// Instantiate the Database and Author objects
+// Instantiate database and connect
 $database = new Database();
 $db = $database->connect();
+
+// Instantiate author object
 $author = new Author($db);
 
-// Handle GET requests
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    if (isset($_GET['id'])) {
-        // Fetch a specific author by ID
-        $stmt = $author->readSingle($_GET['id']);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+// Check if an ID is provided
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
 
-        if ($row) {
-            echo json_encode($row); // Return the author as JSON
-        } else {
-            echo json_encode(["message" => "author_id Not Found"]); // Error if ID not found
-        }
+    // Fetch a single author by ID
+    $query = "SELECT id, author FROM authors WHERE id = :id LIMIT 1";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        // Return the specific author as JSON
+        echo json_encode($row);
     } else {
-        // Fetch all authors
-        $stmt = $author->readAll();
-        $authors = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode($authors); // Return all authors as JSON
+        // No author found with the provided ID
+        echo json_encode(array('message' => 'No author found with the given ID.'));
     }
 } else {
-    echo json_encode(["message" => "Invalid Request Method"]);
+    // Fetch all authors
+    $query = "SELECT id, author FROM authors";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    $authors = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Return all authors as JSON
+    echo json_encode($authors);
 }
 ?>
-

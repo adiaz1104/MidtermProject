@@ -1,32 +1,46 @@
 <?php
-// Set the response to JSON format
+// Headers
+header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-include_once '../config/database.php';
+include_once '../config/Database.php';
 include_once '../models/Quote.php';
 
-$database = new Database(); // Instantiate Database class
-$db = $database->connect(); // Get database connection
-$quote = new Quote($db); // Instantiate Quote model
+// Instantiate database and connect
+$database = new Database();
+$db = $database->connect();
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    if (isset($_GET['id'])) {
-        // If a specific ID is requested
-        $stmt = $quote->readSingle($_GET['id']);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+// Instantiate quote object
+$quote = new Quote($db);
 
-        if ($row) {
-            echo json_encode($row); // Return the specific quote as JSON
-        } else {
-            echo json_encode(["message" => "No Quotes Found"]);
-        }
+// Check if an ID is provided
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+
+    // Fetch a single quote by ID
+    $query = "SELECT id, quote, author_id, category_id FROM quotes WHERE id = :id LIMIT 1";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        // Return the specific quote as JSON
+        echo json_encode($row);
     } else {
-        // If no specific ID is requested, return all quotes
-        $stmt = $quote->readAll();
-        $quotes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode($quotes); // Return all quotes as JSON
+        // No quote found with the provided ID
+        echo json_encode(array('message' => 'No quote found with the given ID.'));
     }
 } else {
-    echo json_encode(["message" => "Invalid Request Method"]);
+    // Fetch all quotes
+    $query = "SELECT id, quote, author_id, category_id FROM quotes";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    $quotes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Return all quotes as JSON
+    echo json_encode($quotes);
 }
 ?>

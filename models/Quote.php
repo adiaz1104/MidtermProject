@@ -39,7 +39,5 @@ class Quote {
         $stmt->execute();
         return $stmt;
     }
-
-    // Additional CRUD methods (create, update, delete) can be added here
 }
 ?>

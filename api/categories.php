@@ -1,34 +1,46 @@
 <?php
-// Set the response to JSON format
+// Headers
+header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-include_once '../config/database.php';
+include_once '../config/Database.php';
 include_once '../models/Category.php';
 
-// Instantiate the Database and Category objects
+// Instantiate database and connect
 $database = new Database();
 $db = $database->connect();
+
+// Instantiate category object
 $category = new Category($db);
 
-// Handle GET requests
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    if (isset($_GET['id'])) {
-        // Fetch a specific category by ID
-        $stmt = $category->readSingle($_GET['id']);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+// Check if an ID is provided
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
 
-        if ($row) {
-            echo json_encode($row); // Return the category as JSON
-        } else {
-            echo json_encode(["message" => "category_id Not Found"]); // Error if ID not found
-        }
+    // Fetch a single category by ID
+    $query = "SELECT id, category FROM categories WHERE id = :id LIMIT 1";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) {
+        // Return the specific category as JSON
+        echo json_encode($row);
     } else {
-        // Fetch all categories
-        $stmt = $category->readAll();
-        $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_encode($categories); // Return all categories as JSON
+        // No category found with the provided ID
+        echo json_encode(array('message' => 'No category found with the given ID.'));
     }
 } else {
-    echo json_encode(["message" => "Invalid Request Method"]);
+    // Fetch all categories
+    $query = "SELECT id, category FROM categories";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Return all categories as JSON
+    echo json_encode($categories);
 }
 ?>
