@@ -55,20 +55,6 @@ class Database {
         echo "Host: {$this->host}, Database: {$this->db_name}, User: {$this->username}, Password: {$this->password}";
         }
 
-    /*public function connect() {
-        $this->conn = null;
-
-        try {
-            // Create database connection using PDO
-            $this->conn = new PDO("pgsql:host=$this->host;dbname=$this->db_name", $this->username, $this->password);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e) {
-            echo "Connection failed: " . $e->getMessage();
-        }
-
-        return $this->conn;
-    }*/
-
     public function connect() {
         $this->conn = null;
     

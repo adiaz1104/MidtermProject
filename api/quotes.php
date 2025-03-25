@@ -3,8 +3,8 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
-include_once '/home/runner/workspace/config/Database.php';
-//include_once __DIR__ . '/../config/Database.php';
+//include_once '/home/runner/workspace/config/Database.php';
+include_once __DIR__ . '/../config/Database.php';
 include_once '../models/Quote.php';
 
 // Instantiate database and connect
