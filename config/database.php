@@ -50,9 +50,12 @@ class Database {
         $this->db_name = getenv('DB_NAME');
         $this->username = getenv('DB_USER');
         $this->password = getenv('DB_PASSWORD');
-    }
+        
+        // Debugging: Output environment variables
+        echo "Host: {$this->host}, Database: {$this->db_name}, User: {$this->username}, Password: {$this->password}";
+        }
 
-    public function connect() {
+    /*public function connect() {
         $this->conn = null;
 
         try {
@@ -63,6 +66,19 @@ class Database {
             echo "Connection failed: " . $e->getMessage();
         }
 
+        return $this->conn;
+    }*/
+
+    public function connect() {
+        $this->conn = null;
+    
+        try {
+            $this->conn = new PDO("pgsql:host={$this->host};dbname={$this->db_name};sslmode=require", $this->username, $this->password);
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            echo "Connection failed: " . $e->getMessage();
+        }
+    
         return $this->conn;
     }
 }
